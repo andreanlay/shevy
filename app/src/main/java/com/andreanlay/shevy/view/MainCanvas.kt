@@ -11,10 +11,21 @@ import android.view.View;
 import android.view.ViewConfiguration
 import androidx.core.content.res.ResourcesCompat
 import com.andreanlay.shevy.R
+import com.andreanlay.shevy.common.OnCanvasCreateListener
+import com.andreanlay.shevy.common.OnCanvasUpdateListener
 import kotlin.math.abs
 
-class MainCanvas(context: Context, attrs: AttributeSet) : View(context) {
-    private lateinit var canvas: Canvas
+/*
+    This is a custom view used to handle drawing from the app UI.
+    it will override onSizeChanged, onDraw, and onTouch events from View
+
+    Reference:
+    Advance Android in Kotlin 02.2
+    https://developer.android.com/codelabs/advanced-android-kotlin-training-canvas
+ */
+
+class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
+    private var canvas: Canvas = Canvas()
     private lateinit var bitmap: Bitmap
     private val BACKGROUND_COLOR = ResourcesCompat.getColor(resources, R.color.black, null);
     private val DRAW_COLOR = ResourcesCompat.getColor(resources, R.color.white, null)
@@ -26,7 +37,7 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context) {
     private var currentX = 0f
     private var currentY = 0f
 
-    private var path = Path()
+    private var path =  Path()
     private val paint = Paint().apply {
         color = DRAW_COLOR
         isAntiAlias = true
@@ -37,22 +48,39 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context) {
         strokeWidth = STROKE_WIDTH
     }
 
+    /*
+        We create a custom event listener for Canvas because by default,
+        canvas is supported by the data binding framework so there aren't
+        listeners to allow the data binding framework to know when something
+        has changed.
+
+        So we need to create a custom listeners to let us know when
+        the bound data is changed
+     */
+    private var onCanvasUpdateListener: OnCanvasUpdateListener? = null
+    private var onCanvasCreateListener: OnCanvasCreateListener? = null
+
+    fun setOnCanvasUpdateListener(listener: OnCanvasUpdateListener?) {
+        this.onCanvasUpdateListener = listener
+    }
+
+    fun setOnCanvasCreateListener(listener: OnCanvasCreateListener?) {
+        this.onCanvasCreateListener = listener
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-
-        // To prevent memory leak caused by old bitmaps
-        if (::bitmap.isInitialized) {
-            bitmap.recycle()
-        }
 
         bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         canvas = Canvas(bitmap)
         canvas.drawColor(BACKGROUND_COLOR)
+        onCanvasCreateListener?.onCanvasCreated(bitmap)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawBitmap(bitmap, 0f, 0f, null)
+        onCanvasUpdateListener?.onCanvasUpdated(bitmap)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -87,10 +115,19 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context) {
 
             canvas.drawPath(path, paint)
         }
-        invalidate()
+        updateView()
     }
 
     private fun touchStop() {
         path.reset()
+    }
+
+    private fun updateView() {
+        invalidate()
+    }
+
+    fun setBitmap(bitmap: Bitmap) {
+        this.bitmap = bitmap
+        updateView()
     }
 }
