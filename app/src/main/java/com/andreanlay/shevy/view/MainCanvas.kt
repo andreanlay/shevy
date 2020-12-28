@@ -1,10 +1,7 @@
 package com.andreanlay.shevy.view
 
 import android.content.Context;
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View;
@@ -29,13 +26,18 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private lateinit var bitmap: Bitmap
     private val BACKGROUND_COLOR = ResourcesCompat.getColor(resources, R.color.black, null);
     private val DRAW_COLOR = ResourcesCompat.getColor(resources, R.color.white, null)
-    private val STROKE_WIDTH = 12f
+    private val STROKE_WIDTH = 7.5f
+
+    private val MARGIN = 50
 
     private var touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private var touchX = 0f
     private var touchY = 0f
     private var currentX = 0f
     private var currentY = 0f
+
+    private var canvasWidth: Int = -1
+    private var canvasHeight: Int = -1
 
     private var path =  Path()
     private val paint = Paint().apply {
@@ -46,6 +48,17 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
         strokeWidth = STROKE_WIDTH
+    }
+
+    private val rectPaint = Paint().apply {
+        color = DRAW_COLOR
+        isAntiAlias = true
+        isDither = true
+        style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = STROKE_WIDTH
+        alpha = 75
     }
 
     /*
@@ -71,9 +84,13 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
+        this.canvasWidth = w
+        this.canvasHeight = h
+
         bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         canvas = Canvas(bitmap)
         canvas.drawColor(BACKGROUND_COLOR)
+        drawBorder()
         onCanvasCreateListener?.onCanvasCreated(bitmap)
     }
 
@@ -126,8 +143,13 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    private fun drawBorder() {
+        canvas.drawRect(Rect(MARGIN, MARGIN, canvasWidth - MARGIN, canvasHeight - MARGIN - 700), rectPaint)
+    }
+
     fun setBitmap(bitmap: Bitmap) {
         this.bitmap = bitmap
+        drawBorder()
         updateView()
     }
 }
