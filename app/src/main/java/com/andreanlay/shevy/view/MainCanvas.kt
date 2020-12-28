@@ -29,6 +29,7 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val STROKE_WIDTH = 7.5f
 
     private val MARGIN = 50
+    private val BOTTOM_MARGIN = 700
 
     private var touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private var touchX = 0f
@@ -104,10 +105,13 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         touchX = event.x
         touchY = event.y
 
-        when(event.action) {
-            MotionEvent.ACTION_DOWN -> touchStart()
-            MotionEvent.ACTION_MOVE -> touchMove()
-            MotionEvent.ACTION_UP -> touchStop()
+        // If current point is inside drawing area, process event
+        if(!isInvalidPoints(touchX, touchY)) {
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> touchStart()
+                MotionEvent.ACTION_MOVE -> touchMove()
+                MotionEvent.ACTION_UP -> touchStop()
+            }
         }
 
         return true
@@ -144,7 +148,22 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawBorder() {
-        canvas.drawRect(Rect(MARGIN, MARGIN, canvasWidth - MARGIN, canvasHeight - MARGIN - 700), rectPaint)
+        val rect = Rect(MARGIN, MARGIN, canvasWidth - MARGIN, canvasHeight - MARGIN - BOTTOM_MARGIN)
+        canvas.drawRect(rect, rectPaint)
+    }
+
+    /*
+        Check if current touch coordinate is outside bounding area (Rect) or not
+        x > canvasWidth - MARGIN: Point is too far right
+        x < MARGIN: Point is too far left
+        y > canvasHeight - BOTTOM_MARGIN: Point is too far down
+        y < MARGIN: Point is too far up
+     */
+    private fun isInvalidPoints(x: Float, y: Float): Boolean {
+        val horizontalInvalid = x > canvasWidth - MARGIN || x < MARGIN
+        val verticalInvalid = y > canvasHeight - BOTTOM_MARGIN || y < MARGIN
+
+        return horizontalInvalid || verticalInvalid
     }
 
     fun setBitmap(bitmap: Bitmap) {
