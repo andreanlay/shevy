@@ -5,11 +5,16 @@ import android.util.Log
 import androidx.databinding.*
 import androidx.databinding.library.baseAdapters.BR
 import com.andreanlay.shevy.model.CanvasBitmap
+import com.andreanlay.shevy.model.ShapePredictor
+import java.nio.MappedByteBuffer
 import kotlin.properties.Delegates
 
 class MainViewModel: BaseObservable() {
     private var canvasBitmap = CanvasBitmap()
 
+    private lateinit var predictor: ShapePredictor
+
+    private var resultString = "Please draw your shape"
     private lateinit var prediction: String
     private var confidenceRate by Delegates.notNull<Float>()
 
@@ -30,7 +35,10 @@ class MainViewModel: BaseObservable() {
     }
 
     fun onPredictClicked() {
-        Log.d("ViewModel", "Predict!")
+        val buffer = canvasBitmap.getImage()
+
+        this.resultString =  predictor.solve(buffer)
+        notifyPropertyChanged(BR.resultString)
     }
 
     fun onClearClicked() {
@@ -41,5 +49,14 @@ class MainViewModel: BaseObservable() {
     @Bindable
     fun getCanvasBitmap(): Bitmap {
         return canvasBitmap.getBitmap()
+    }
+
+    @Bindable
+    fun getResultString(): String {
+        return resultString
+    }
+
+    fun initializeModel(model: MappedByteBuffer) {
+        predictor = ShapePredictor(model)
     }
 }
