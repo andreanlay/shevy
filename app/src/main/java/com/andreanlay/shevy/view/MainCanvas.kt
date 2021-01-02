@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewConfiguration
 import androidx.core.content.res.ResourcesCompat
 import com.andreanlay.shevy.R
+import com.andreanlay.shevy.common.CANVAS_MARGIN
 import com.andreanlay.shevy.common.OnCanvasCreateListener
 import com.andreanlay.shevy.common.OnCanvasUpdateListener
 import kotlin.math.abs
@@ -26,10 +27,8 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private lateinit var bitmap: Bitmap
     private val BACKGROUND_COLOR = ResourcesCompat.getColor(resources, R.color.black, null);
     private val DRAW_COLOR = ResourcesCompat.getColor(resources, R.color.white, null)
-    private val STROKE_WIDTH = 7.5f
-
-    private val MARGIN = 50
-    private val BOTTOM_MARGIN = 700
+    private val STROKE_WIDTH = 30f
+    private val RECT_WIDTH = 7.5f
 
     private var touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private var touchX = 0f
@@ -58,7 +57,7 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
-        strokeWidth = STROKE_WIDTH
+        strokeWidth = RECT_WIDTH
         alpha = 75
     }
 
@@ -148,7 +147,10 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawBorder() {
-        val rect = Rect(MARGIN, MARGIN, canvasWidth - MARGIN, canvasHeight - MARGIN - BOTTOM_MARGIN)
+        val rect = Rect(CANVAS_MARGIN, CANVAS_MARGIN,
+            canvasWidth - CANVAS_MARGIN,
+            (0.5 * canvasHeight).toInt()
+        )
         canvas.drawRect(rect, rectPaint)
     }
 
@@ -160,8 +162,8 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
         y < MARGIN: Point is too far up
      */
     private fun isInvalidPoints(x: Float, y: Float): Boolean {
-        val horizontalInvalid = x > canvasWidth - MARGIN || x < MARGIN
-        val verticalInvalid = y > canvasHeight - BOTTOM_MARGIN || y < MARGIN
+        val horizontalInvalid = x > canvasWidth - CANVAS_MARGIN || x < CANVAS_MARGIN
+        val verticalInvalid = y > 0.5 * canvasHeight || y < CANVAS_MARGIN
 
         return horizontalInvalid || verticalInvalid
     }
