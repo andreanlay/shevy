@@ -8,9 +8,7 @@ import android.view.View;
 import android.view.ViewConfiguration
 import androidx.core.content.res.ResourcesCompat
 import com.andreanlay.shevy.R
-import com.andreanlay.shevy.common.CANVAS_MARGIN
-import com.andreanlay.shevy.common.OnCanvasCreateListener
-import com.andreanlay.shevy.common.OnCanvasUpdateListener
+import com.andreanlay.shevy.common.*
 import kotlin.math.abs
 
 /*
@@ -27,8 +25,6 @@ class MainCanvas(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private lateinit var bitmap: Bitmap
     private val BACKGROUND_COLOR = ResourcesCompat.getColor(resources, R.color.black, null);
     private val DRAW_COLOR = ResourcesCompat.getColor(resources, R.color.white, null)
-    private val STROKE_WIDTH = 30f
-    private val RECT_WIDTH = 7.5f
 
     private var touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private var touchX = 0f

@@ -15,8 +15,6 @@ class MainViewModel: BaseObservable() {
     private lateinit var predictor: ShapePredictor
 
     private var resultString = "Please draw your shape"
-    private lateinit var prediction: String
-    private var confidenceRate by Delegates.notNull<Float>()
 
     /*
         This function handle onCanvasUpdated() events
