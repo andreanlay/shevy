@@ -1,6 +1,7 @@
 package com.andreanlay.shevy.model
 
 import android.os.Build
+import com.andreanlay.shevy.common.MINIMUM_CONFIDENCE_RATE
 import com.andreanlay.shevy.common.SHAPES
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.nnapi.NnApiDelegate
@@ -31,9 +32,16 @@ class ShapePredictor(model: MappedByteBuffer){
 
         val result = output[0]
         val max = result.indices.maxByOrNull { result[it] }
-
         val confidenceRate = result[max!!] * 100
         val shape = SHAPES[max]
-        return "I'm $confidenceRate% sure it's a $shape"
+
+        val prediction = if(confidenceRate <= MINIMUM_CONFIDENCE_RATE) {
+            "Sorry, I can't understand what you are drawing"
+        } else {
+            "I'm $confidenceRate% sure it's a $shape"
+        }
+
+
+        return prediction
     }
 }
